@@ -1,5 +1,55 @@
-"use server"
+"use server";
+import prisma from "@/db/db";
+import fs from "fs/promises";
+import { redirect } from "next/navigation";
+import { z } from "zod";
+const fileSchema = z.instanceof(File, { message: " file Required" });
+const imageSchema = fileSchema.refine(
+  (file) => file.size === 0 || file.type.startsWith("image/")
+);
+const validation = z.object({
+  name: z.string().min(1),
+  description: z.string().min(1),
+  priceInCents: z.string(),
+  file: fileSchema.refine((file) => file.size > 0, {
+    message: " file size Required",
+  }),
+  image: imageSchema.refine((file) => file.size > 0, {
+    message: "file size Required",
+  }),
+});
+export async function AddProduct(formData: FormData) {
+  const result = validation.safeParse(Object.fromEntries(formData.entries()));
+  if (result.success === false) {
 
-export async function AddProduct(formData:FormData) {
-    console.log(formData)
+    return result.error.formErrors.fieldErrors;
+  }
+  const data = result.data;
+  await fs.mkdir("/products/", { recursive: true });
+  const filePath = `/products/${crypto.randomUUID()}-${data.file.name}`;
+  await fs.writeFile(filePath, Buffer.from(await data.file.arrayBuffer()));
+
+  await fs.mkdir("/public/products", { recursive: true });
+  const imagePath = `/products/${crypto.randomUUID()}-${data.image.name}`;
+  await fs.writeFile(
+    `public${imagePath}`,
+    Buffer.from(await data.image.arrayBuffer())
+    );
+    try {
+       await  prisma.product.create({
+           data: {
+        isAvailableForPurchase:false,
+      name: data.name,
+      priceInCents: data.priceInCents,
+      description: data.description,
+      filePath,
+      imagePath,
+    },
+         });
+        console.log("created")
+    } catch (error) {
+        console.log(error)
+    }
+ 
+  redirect("/admin/products");
 }
