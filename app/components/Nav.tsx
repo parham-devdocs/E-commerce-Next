@@ -12,7 +12,7 @@ export function Navlink(props: Omit<ComponentProps<typeof Link>, "className">) {
       <Link
         {...props}
         className={cn(
-          " p-4 hover:bg-secondary hover:text-secondary-foreground focus-visible:bg-secondary focus-visible::text-secondary-foreground"
+          " p-4 hover:bg-black hover:text-white transition-colors duration-300 focus-visible:bg-secondary focus-visible::text-secondary-foreground"
  ) }
       ></Link>
     );
