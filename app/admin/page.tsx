@@ -1,7 +1,14 @@
-import { Card, CardHeader,CardDescription,CardContent, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardDescription,
+  CardContent,
+  CardTitle,
+} from "@/components/ui/card";
+import Loading from "./loading";
 import prisma from "@/db/db";
 import { formatNumber } from "@/lib/formatters";
-import { formatCurrency } from './../../lib/formatters';
+import { formatCurrency } from "./../../lib/formatters";
 async function getSalesData() {
   const data = await prisma.order.aggregate({
     _sum: { pricePaidInCents: true },
@@ -13,40 +20,41 @@ async function getSalesData() {
   };
 }
 async function getUsersData() {
-  const [userCount,orderData] =await Promise.all([
-  prisma.user.count(),
+  const [userCount, orderData] = await Promise.all([
+    prisma.user.count(),
 
     prisma.order.aggregate({
-      _sum:{pricePaidInCents:true}
-    })
-  ])
-  return{
+      _sum: { pricePaidInCents: true },
+    }),
+  ]);
+  return {
     userCount,
-    averageValuePerUser:userCount===0 ? 0 : (orderData._sum.pricePaidInCents || 0)/100
-  }
+    averageValuePerUser:
+      userCount === 0 ? 0 : (orderData._sum.pricePaidInCents || 0) / 100,
+  };
 }
 async function getProductsData() {
- const [activeCount,inactiveCount]= await Promise.all([
-   await prisma.product.count({where:{isAvailableForPurchase:true}}),
-   await prisma.product.count({where:{isAvailableForPurchase:false}})
-
- ])
-  return{activeCount,inactiveCount}
+  const [activeCount, inactiveCount] = await Promise.all([
+    await prisma.product.count({ where: { isAvailableForPurchase: true } }),
+    await prisma.product.count({ where: { isAvailableForPurchase: false } }),
+  ]);
+  return { activeCount, inactiveCount };
 }
 type DashboardCardProps = {
   title: string;
-  subtitle: string ;
-  body: string 
+  subtitle: string;
+  body: string;
 };
 
 export default async function AdminDashboard() {
-  const [SalesData,UsersData,productData] =await Promise.all([
+  const [SalesData, UsersData, productData] = await Promise.all([
     getSalesData(),
     getUsersData(),
-    getProductsData()
-])
+    getProductsData(),
+  ]);
+
   return (
-    <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ">
       <DashboardCard
         title="Sales"
         subtitle={`${formatNumber(SalesData.numberOfSales)} orders`}
@@ -61,23 +69,23 @@ export default async function AdminDashboard() {
       />
       <DashboardCard
         title="Active Products"
-        subtitle={`${formatNumber(
-          productData.inactiveCount
-        )} inactive`}
+        subtitle={`${formatNumber(productData.inactiveCount)} inactive`}
         body={formatNumber(productData.activeCount)}
       />
     </div>
   );
 }
 
-function DashboardCard({title,subtitle,body}:DashboardCardProps) {
-  return  <Card>
+function DashboardCard({ title, subtitle, body }: DashboardCardProps) {
+  return (
+    <Card>
       <CardHeader>
-        <CardTitle>{title }</CardTitle>
-        <CardDescription>{ subtitle } </CardDescription>
+        <CardTitle className=" text-primary">{title}</CardTitle>
+        <CardDescription>{subtitle} </CardDescription>
       </CardHeader>
       <CardContent>
-        <p>{ body}</p>
+        <p>{body}</p>
       </CardContent>
-    </Card>;
+    </Card>
+  );
 }
