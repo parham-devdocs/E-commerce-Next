@@ -1,7 +1,7 @@
 "use server";
 import prisma from "@/db/db";
 import fs from "fs/promises";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
 const fileSchema = z.instanceof(File, { message: " file Required" });
 const imageSchema = fileSchema.refine(
@@ -52,4 +52,23 @@ export async function AddProduct(formData: FormData) {
     }
  
   redirect("/admin/products");
+}
+
+
+export async function toggleProductAvailability( id, isAvailableForPurchase) {
+  await prisma.product.update({
+    where: { id },
+    data: {
+      isAvailableForPurchase,
+    },
+  });
+}
+
+export async function deleteProduct(id) {
+ const product= await prisma.product.delete({
+    where:{id}
+ })
+  if (product===null) {
+    return notFound()
+  }
 }
