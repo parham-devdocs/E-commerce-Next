@@ -109,7 +109,7 @@ async function ProductsTable() {
                       id={item.id}
                       isAvailableForPurchase={item.isAvailableForPurchase}
                     />
-                    <DeleteDropDownItem id={ item.id } />
+                    <DeleteDropDownItem id={ item.id }   />
                   </DropdownMenuContent>
                 </DropdownMenu>
                 <span className=" sr-only">Actions</span>

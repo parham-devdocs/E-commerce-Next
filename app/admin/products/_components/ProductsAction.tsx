@@ -25,13 +25,13 @@ const [isPending, startTransition] = useTransition();
 
 
 
-export  function DeleteDropDownItem({ id }: { id: string }) {
+export  function DeleteDropDownItem({ id,filePath }: { id: string}) {
     const [isPending, startTransition] = useTransition();
 
     return <DropdownMenuItem disabled={isPending} onClick={() => {
         startTransition(async () => {
             await deleteProduct(id)
-            readFile(`/public/products/${id}`)
+        
         })
     }}>
         Delete
