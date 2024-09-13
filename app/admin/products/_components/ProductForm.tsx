@@ -9,10 +9,11 @@ import { useState } from "react";
 import { formatCurrency } from "@/lib/formatters";
 import { AddProduct } from "../../_actions";
 import { useFormStatus,useFormState } from "react-dom";
-export default function ProductForm() {
-    const [priceInCents, setPriceInCents] = useState<number>(0);
+import {Product  } from "@prisma/client";
+export default function ProductForm({ product }: { product?: Product | null }) {
+  const [priceInCents, setPriceInCents] = useState<number | undefined>(Number(product?.priceInCents) || 0);
     const { pending } = useFormStatus()
-    
+  
     return (
       <div className=" flex  justify-between">
         <form className=" space-y-8 lg:w-[50%] w-full " action={AddProduct}>
@@ -23,6 +24,7 @@ export default function ProductForm() {
               id="name"
               name="name"
               required
+              defaultValue={product?.name}
               className=" focus:border-2 focus:border-primary transition-colors duration-300"
             ></Input>
           </div>
@@ -47,6 +49,7 @@ export default function ProductForm() {
               id="description"
               name="description"
               className=" focus:border-2 focus:border-primary transition-colors duration-300"
+              defaultValue={product?.description}
             ></Textarea>
           </div>
           <div className=" space-y-2">
@@ -56,8 +59,11 @@ export default function ProductForm() {
               id="file"
               name="file"
               className=" focus:border-2 focus:border-primary transition-colors duration-300"
-            ></Input>
-
+              value={product?.filePath}
+            />
+            {product?.filePath && (
+              <p className=" text-secondary-foreground"> {product?.filePath}</p>
+            )}
           </div>
           <div className=" space-y-2">
             <Label htmlFor="name">Image</Label>
@@ -66,8 +72,11 @@ export default function ProductForm() {
               id="image"
               name="image"
               className=" focus:border-2 focus:border-primary transition-colors duration-300"
-            ></Input>
-
+              value={product?.imagePath}
+            />
+            {product?.imagePath && (
+              <Image src={product?.imagePath} alt="product image" height="200" width="200"/>
+            )}
           </div>
           <Button
             type="submit"
