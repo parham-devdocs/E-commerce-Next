@@ -1,41 +1,58 @@
-"use client"
+"use client";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { deleteProduct, toggleProductAvailability } from "../../_actions";
-import { readFile } from 'fs/promises';
+import { useRouter } from "next/navigation";
+import  fs  from 'fs/promises';
 
-export  function ActiveToggleDropDownItem({
+export function ActiveToggleDropDownItem({
   id,
   isAvailableForPurchase,
 }: {
-  id:string;
-  isAvailableForPurchase:boolean;
-    }) {
-const [isPending, startTransition] = useTransition();
-    return <DropdownMenuItem disabled={isPending} onClick={() => {
-
-        startTransition(async() =>{
-            await toggleProductAvailability(id,!isAvailableForPurchase)
-        })
-    }}>
-        {isAvailableForPurchase ? "Deactivate" : "Activate"}
-        
-  </DropdownMenuItem>;
-}
-
-
-
-export  function DeleteDropDownItem({ id,filePath }: { id: string}) {
+  id: string;
+  isAvailableForPurchase: boolean;
+}) {
     const [isPending, startTransition] = useTransition();
-
-    return <DropdownMenuItem disabled={isPending} onClick={() => {
+    const router=useRouter()
+  return (
+    <DropdownMenuItem
+      disabled={isPending}
+      onClick={() => {
         startTransition(async () => {
-            await deleteProduct(id)
-        
-        })
-    }}>
-        Delete
-    
-</DropdownMenuItem>
+            await toggleProductAvailability(id, !isAvailableForPurchase);
+            router.refresh()
+        });
+      }}
+    >
+      {isAvailableForPurchase ? "Deactivate" : "Activate"}
+    </DropdownMenuItem>
+  );
 }
 
+export function DeleteDropDownItem({
+  id,
+  disabled,
+}: {
+  id: string;
+  disabled: boolean;
+}) {
+    const [isPending, startTransition] = useTransition();
+    const router=useRouter()
+    return (
+      <DropdownMenuItem
+          variant="destructive"
+          disabled={disabled}
+          
+      className=" text-red-700 mt-3"
+      onClick={() => {
+        startTransition(async () => {
+            await deleteProduct(id);
+            router.refresh()
+            
+        });
+      }}
+    >
+      Delete
+    </DropdownMenuItem>
+  );
+}
