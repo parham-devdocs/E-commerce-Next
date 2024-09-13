@@ -21,7 +21,6 @@ const validation = z.object({
 export async function AddProduct(formData: FormData) {
   const result = validation.safeParse(Object.fromEntries(formData.entries()));
   if (result.success === false) {
-
     return result.error.formErrors.fieldErrors;
   }
   const data = result.data;
@@ -34,28 +33,27 @@ export async function AddProduct(formData: FormData) {
   await fs.writeFile(
     `public${imagePath}`,
     Buffer.from(await data.image.arrayBuffer())
-    );
-    try {
-       await  prisma.product.create({
-           data: {
-        isAvailableForPurchase:false,
-      name: data.name,
-      priceInCents: data.priceInCents,
-      description: data.description,
-      filePath,
-      imagePath,
-    },
-         });
-        console.log("created")
-    } catch (error) {
-        console.log(error)
-    }
- 
+  );
+  try {
+    await prisma.product.create({
+      data: {
+        isAvailableForPurchase: false,
+        name: data.name,
+        priceInCents: data.priceInCents,
+        description: data.description,
+        filePath,
+        imagePath,
+      },
+    });
+    console.log("created");
+  } catch (error) {
+    console.log(error);
+  }
+
   redirect("/admin/products");
 }
 
-
-export async function toggleProductAvailability( id, isAvailableForPurchase) {
+export async function toggleProductAvailability(id, isAvailableForPurchase) {
   await prisma.product.update({
     where: { id },
     data: {
@@ -65,12 +63,70 @@ export async function toggleProductAvailability( id, isAvailableForPurchase) {
 }
 
 export async function deleteProduct(id) {
- const product= await prisma.product.delete({
-    where:{id}
- })
-  if (product===null) {
-    return notFound()
+  const product = await prisma.product.delete({
+    where: { id },
+  });
+  if (product === null) {
+    return notFound();
   }
-  
+}
 
+const editSchema = validation.extend({
+  file: fileSchema.optional(),
+  image: imageSchema.optional(),
+});
+export async function EditProduct(
+  id: string,
+  prevState: unknown,
+  formData: FormData
+) {
+  const result = editSchema.safeParse(Object.fromEntries(formData.entries()));
+  if (result.success === false) {
+    return result.error.formErrors.fieldErrors;
+  }
+  const data = result.data;
+  const product = await prisma.product.findUnique({ where: { id } });
+
+  if (product == null) {
+    return notFound();
+  }
+
+
+      let filePath = product.filePath;
+
+  if (data.file != null && data.file.size > 0) {
+    await fs.unlink(filePath);
+    filePath = `/products/${crypto.randomUUID()}-${data?.file?.name}`;
+    await fs.writeFile(filePath, Buffer.from(await data?.file?.arrayBuffer()));
+  }
+
+
+    let imagePath = product.imagePath;
+  if (data.image != null && data.image.size > 0) {
+    await fs.unlink(imagePath);
+    imagePath = `/products/${crypto.randomUUID()}-${data?.image?.name}`;
+    await fs.writeFile(
+      imagePath,
+      Buffer.from(await data?.image?.arrayBuffer())
+    );
+  }
+
+  try {
+    await prisma.product.update({
+      where: { id }, data: {
+        isAvailableForPurchase: false,
+        name:data.name,
+
+        description: data.description,
+        priceInCents: data.priceInCents,
+        filePath,
+        imagePath
+      }
+    });
+    console.log("created");
+  } catch (error) {
+    console.log(error);
+  }
+
+  redirect("/admin/products");
 }

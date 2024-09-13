@@ -7,16 +7,17 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useState } from "react";
 import { formatCurrency } from "@/lib/formatters";
-import { AddProduct } from "../../_actions";
+import { AddProduct, EditProduct } from "../../_actions";
 import { useFormStatus,useFormState } from "react-dom";
 import {Product  } from "@prisma/client";
 export default function ProductForm({ product }: { product?: Product | null }) {
   const [priceInCents, setPriceInCents] = useState<number | undefined>(Number(product?.priceInCents) || 0);
     const { pending } = useFormStatus()
   
-    return (
+  return (
+      
       <div className=" flex  justify-between">
-        <form className=" space-y-8 lg:w-[50%] w-full " action={AddProduct}>
+        <form className=" space-y-8 lg:w-[50%] w-full " action={ AddProduct}>
           <div className=" space-y-2">
             <Label htmlFor="name">Name</Label>
             <Input
@@ -59,7 +60,6 @@ export default function ProductForm({ product }: { product?: Product | null }) {
               id="file"
               name="file"
               className=" focus:border-2 focus:border-primary transition-colors duration-300"
-              value={product?.filePath}
             />
             {product?.filePath && (
               <p className=" text-secondary-foreground"> {product?.filePath}</p>
@@ -72,10 +72,9 @@ export default function ProductForm({ product }: { product?: Product | null }) {
               id="image"
               name="image"
               className=" focus:border-2 focus:border-primary transition-colors duration-300"
-              value={product?.imagePath}
             />
             {product?.imagePath && (
-              <Image src={product?.imagePath} alt="product image" height="200" width="200"/>
+              <Image src={product?.imagePath} alt="product image" height="300" width="300" className=" rounded-lg"/>
             )}
           </div>
           <Button
