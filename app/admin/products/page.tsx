@@ -20,7 +20,12 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@radix-ui/react-dropdown-menu";
-import { DeleteDropDownItem,ActiveToggleDropDownItem } from "./_components/ProductsAction";
+import {
+  DeleteDropDownItem,
+  ActiveToggleDropDownItem,
+} from "./_components/ProductsAction";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { AvatarImage } from "@radix-ui/react-avatar";
 
 export default function AdminProductsPage() {
   return (
@@ -46,6 +51,7 @@ async function ProductsTable() {
       name: true,
       priceInCents: true,
       isAvailableForPurchase: true,
+      imagePath: true,
       _count: { select: { orders: true } },
     },
     orderBy: { name: "asc" },
@@ -63,6 +69,7 @@ async function ProductsTable() {
             <span className=" sr-only">Available For Purchase</span>
           </TableHead>
           <TableHead>Name</TableHead>
+          <TableHead>Image</TableHead>
           <TableHead>Price</TableHead>
           <TableHead>Orders</TableHead>
           <TableHead className=" w-0">
@@ -75,9 +82,22 @@ async function ProductsTable() {
           return (
             <TableRow key={item.id}>
               <TableCell>
-                {item.isAvailableForPurchase ? <CheckCircle2 /> : <XCircle />}
+                {item.isAvailableForPurchase ? (
+                  <CheckCircle2 className=" text-green-700" />
+                ) : (
+                  <XCircle className=" text-destructive" />
+                )}
               </TableCell>
               <TableCell>{item.name}</TableCell>
+              <TableCell>
+                <Avatar>
+                  <AvatarImage
+                    src={item.imagePath}
+                    className=" border-primary"
+                  />
+                  <AvatarFallback>NA</AvatarFallback>
+                </Avatar>
+              </TableCell>
               <TableCell>
                 {formatCurrency(Number(item.priceInCents) / 100)}
               </TableCell>
@@ -109,7 +129,10 @@ async function ProductsTable() {
                       id={item.id}
                       isAvailableForPurchase={item.isAvailableForPurchase}
                     />
-                    <DeleteDropDownItem id={ item.id } disabled={item._count.orders>0}  />
+                    <DeleteDropDownItem
+                      id={item.id}
+                      disabled={item._count.orders > 0}
+                    />
                   </DropdownMenuContent>
                 </DropdownMenu>
                 <span className=" sr-only">Actions</span>
