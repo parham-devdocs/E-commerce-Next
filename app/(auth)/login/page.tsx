@@ -2,17 +2,16 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Login } from "./_action";
 
 export default function LoginPage() {
   return (
-    <div className=" flex justify-center items-center w-full h-screen">
+    <form className=" flex justify-center items-center w-full h-screen bg-yellow-100" action={Login}>
       <Card className=" w-1/3 ">
         <CardHeader>
           <CardTitle className=" text-center">
@@ -24,9 +23,9 @@ export default function LoginPage() {
             <Label htmlFor="password">Email</Label>
 
             <Input
-              type="password"
-              name="password"
-              id="password"
+              type="text"
+              name="email"
+              id="email"
               required
               className=" focus:border-2 focus:border-primary transition-colors duration-300"
             />
@@ -47,6 +46,6 @@ export default function LoginPage() {
           </Button>
         </CardContent>
       </Card>
-    </div>
+    </form>
   );
 }
