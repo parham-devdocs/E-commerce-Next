@@ -1,6 +1,7 @@
 "use server";
 import prisma from "@/db/db";
 import bcrypt from 'bcryptjs';
+import { redirect } from "next/navigation";
 
 type FormData = {
   email: string | undefined;
@@ -19,8 +20,13 @@ export async function Login(formdata: FormData) {
       console.log("User not found");
       return null; // or handle the case as needed
     }
-bcrypt.compare(password,foundUser.)
-    console.log("User found", foundUser);
+      const passwordValidity = bcrypt.compare(password, foundUser.password)
+      if (passwordValidity) {
+          localStorage.setItem("userId", foundUser.id)
+              console.log("User found", foundUser);
+
+          return {message:"user logged in"}
+      }
 
   } catch (error) {
     console.error("Error during login:", error);
