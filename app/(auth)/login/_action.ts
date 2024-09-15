@@ -9,9 +9,7 @@ type FormData = {
 };
 
 export async function Login(formdata: FormData) {
-  const { email, password }: FormData = Object.fromEntries(
-    formdata.entries()
-  ) 
+  const { email, password }: FormData = Object.fromEntries(formdata.entries()) as FormData
 
   try {
     const foundUser = await prisma.user.findUnique({ where: { email } });
