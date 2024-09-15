@@ -5,7 +5,6 @@ import {
   CardContent,
   CardTitle,
 } from "@/components/ui/card";
-import Loading from "./loading";
 import prisma from "@/db/db";
 import { formatNumber } from "@/lib/formatters";
 import { formatCurrency } from "./../../lib/formatters";

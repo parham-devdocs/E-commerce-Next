@@ -14,21 +14,24 @@ import { Product } from "@prisma/client";
 import { ArrowRight, ShoppingCart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-
-const getPopularProducts = async () => {
-  return await prisma.product.findMany({
+import { ProductCard ,ProductCardSkeleton } from "./ProductCard";
+import { Suspense } from "react";
+import {  cache} from "@/lib/cache";
+const getPopularProducts = cache(() => {
+  return prisma.product.findMany({
     where: { isAvailableForPurchase: true },
     orderBy: { orders: { _count: "desc" } },
     take: 6,
   });
-};
-const getNewstProducts = () => {
+}, ["/", "getPopularProducts"],{revalidate:24*60*60});
+
+const getNewstProducts = cache(() => {
   return prisma.product.findMany({
     where: { isAvailableForPurchase: true },
     orderBy: { createdAt: "desc" },
     take: 6,
   });
-};
+}, ["/", " getNewstProducts"],{revalidate:24*60*60});
 export default function HomePage() {
   return (
     <main className=" space-y-12">
@@ -65,38 +68,33 @@ async function ProductGridSection({
         </Button>
       </div>
       <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-32 gap-y-16">
-        {(await productFetcher()).map((item) => {
-          return (
-            <Card className=" flex items-center flex-col border-primary">
-              <CardHeader>
-                <CardTitle>{item.name}</CardTitle>
-                <CardDescription>{item.description}</CardDescription>
-              </CardHeader>
-              <CardContent className=" space-y-6">
-                <Image
-                  src={item.imagePath}
-                  alt={item.name}
-                  width={300}
-                  height={300}
-                  className=" rounded-md mx-auto"
-                />
-                <p>{formatCurrency(item.priceInCents / 100)}</p>
-              </CardContent>
-              <CardFooter>
-                <Button
-                  variant="outline"
-                  className=" bg-primary hover:bg-black hover:text-white transition-colors duration-300 "
-                >
-                  <Link href="/products" className=" gap-2 flex">
-                    Add to cart
-                    <ShoppingCart size={20} />
-                  </Link>
-                </Button>{" "}
-              </CardFooter>
-            </Card>
-          );
-        })}
+        <Suspense fallback={<ProductCardSkeleton/>}>
+        
+          <ProductSuspense productFetcher={productFetcher} />
+        </Suspense>
       </div>
     </div>
   );
+}
+
+
+
+async function ProductSuspense({
+  productFetcher,
+}: {
+  productFetcher: () => Promise<Product[]>;
+}) {
+  const items = await productFetcher(); // Await the promise here
+  return items.map((item) => {
+    return (
+      <ProductCard
+        id={item.id}
+        name={item.name}
+        description={item.description}
+        imagePath={item.imagePath}
+        priceInCents={Number(item.priceInCents)}
+        key={item.id}
+      />
+    );
+  });
 }

@@ -1,6 +1,7 @@
 "use server";
 import prisma from "@/db/db";
 import fs from "fs/promises";
+import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
 const fileSchema = z.instanceof(File, { message: " file Required" });
@@ -49,7 +50,7 @@ export async function AddProduct(formData: FormData) {
   } catch (error) {
     console.log(error);
   }
-
+revalidatePath('/')
   redirect("/admin/products");
 }
 
@@ -60,6 +61,7 @@ export async function toggleProductAvailability(id, isAvailableForPurchase) {
       isAvailableForPurchase,
     },
   });
+  revalidatePath('/')
 }
 
 export async function deleteProduct(id) {
@@ -69,8 +71,9 @@ export async function deleteProduct(id) {
   if (product === null) {
     return notFound();
   }
-}
+  revalidatePath("/");
 
+}
 const editSchema = validation.extend({
   file: fileSchema.optional(),
   image: imageSchema.optional(),
@@ -127,6 +130,6 @@ export async function EditProduct(
   } catch (error) {
     console.log(error);
   }
-
+revalidatePath('/')
   redirect("/admin/products");
 }
